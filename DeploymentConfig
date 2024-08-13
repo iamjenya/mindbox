@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-app
+  labels:
+    app: web-app
+spec:
+  replicas: 4  # Number of replicas for peak load
+  selector:
+    matchLabels:
+      app: web-app
+  template:
+    metadata:
+      labels:
+        app: web-app
+    spec:
+      containers:
+      - name: web-app
+        image: your-docker-image:latest  # Replace with your image
+        resources:
+          requests:
+            cpu: "0.5"  # Initial high resource request for startup
+            memory: "128Mi"  # Memory request
+          limits:
+            cpu: "1"  # Maximum CPU usage
+            memory: "128Mi"  # Maximum memory usage
+        readinessProbe:
+          httpGet:
+            path: /healthcheck
+            port: 80
+          initialDelaySeconds: 10  # Wait time for initial readiness check
+          periodSeconds: 10  # Interval between readiness checks
+        livenessProbe:
+          httpGet:
+            path: /healthcheck
+            port: 80
+          initialDelaySeconds: 30  # Delay before the first liveness probe
+          periodSeconds: 10  # Interval between liveness probes
+        env:
+        - name: ENVIRONMENT
+          value: "production"
